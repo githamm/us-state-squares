@@ -7,13 +7,7 @@
     <style>
 
       h1, .d3-tip {
-        font-family: 'Quicksand', sans-serif;
-      }
-
-      #footer {
-        position: absolute;
-        top: 410px;
-        left:500px;
+        font-family: 'Helvetica', sans-serif;
       }
 
       #legend {
@@ -36,7 +30,7 @@
       .place,
       .place-label {
         fill: #444;
-        font-family: Helvetica;
+        font-family: 'Helvetica';
         font-weight: bold;
       }
 
@@ -61,28 +55,29 @@
   </head>
   <body>
     <div id="legend"><h1>Craft Breweries per Capita</h1></div>
-    <div id="footer">
-      <p>Source: <a href="https://www.brewersassociation.org/statistics/by-state/" target="_blank">Brewers' Association - 2015</a></p>
-	  <p>Map: <a href="http://twitter.com/vtcraghead" target="_blank">Bill Morris</a></p>
-    </div>
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <script src="http://d3js.org/queue.v1.min.js"></script>
     <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+    <script src="colorbrewer.js"></script>
     <script>
 
-    var width = 700,
-        height = 400;
+    var width = 900,
+        height = 600;
 
-    var colorRamp = ['#e5f5f9','red'];
+    var colorRamp = ['#e5f5f9','green'];
 
     var rateById = d3.map();
 
     var color = d3.scale.linear()
-      .domain([0, 6.5])
+      .domain([25, 117])
       .range(colorRamp);
 
+    //var color = d3.scale.linear()
+    //.domain([25, 117])
+    //.range(colorbrewer.Blues[9]);
+
     var projection = d3.geo.equirectangular()
-      .scale(2000)
+      .scale(2500)
       .center([-96.03542,41.69553])
       .translate([width / 2, height / 2]);
 
@@ -93,7 +88,7 @@
       .attr('class', 'd3-tip')
       .offset([-10, 0])
       .html(function(d) {
-        return "<strong>" + d.properties.abbr + " - </strong><span>" + rateById.get(d.properties.abbr) + " breweries per capita</span>";
+        return "<strong>" + d.properties.abbr + " - </strong><span>" + rateById.get(d.properties.abbr) + " average adjusted gross income</span>";
       })
 
     var svg = d3.select("body").append("svg")
@@ -104,7 +99,7 @@
 
     queue()
       .defer(d3.json, "../state_squares.geojson")
-      .defer(d3.csv, "bpc.csv", function(d) { rateById.set(d.state, +d.bpc); })
+      .defer(d3.csv, "mig_to_colo_map_reduced_all.csv", function(d) { rateById.set(d.fromAbv, d.avgAgi); })
       .await(ready);
 
     // Build map and labels
@@ -160,7 +155,7 @@
       .attr("transform", "translate(0,0)");
     var y = d3.scale.linear()
       .range([0, 300])
-      .domain([0, 6.5]);
+      .domain([25, 117]);
     var yAxis = d3.svg.axis()
       .scale(y)
       .ticks(4)
